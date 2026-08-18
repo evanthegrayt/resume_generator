@@ -28,6 +28,7 @@ setup:
 		rm -rf "$(VENV)"; \
 	fi
 	@if [ ! -f "$(INSTALL_STAMP)" ] || [ pyproject.toml -nt "$(INSTALL_STAMP)" ] || [ Makefile -nt "$(INSTALL_STAMP)" ]; then \
+		set -e; \
 		$(PYTHON) -m venv "$(VENV)"; \
 		"$(BIN)/python" -m pip install --upgrade pip; \
 		"$(BIN)/python" -m pip install -e ".[dev]"; \
