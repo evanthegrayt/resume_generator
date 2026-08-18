@@ -1,8 +1,11 @@
+"""DOCX and PDF rendering adapter for local resume documents."""
+
 import os
 import shutil
 import subprocess
 import tempfile
 from pathlib import Path
+from typing import Optional, Union
 
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -10,13 +13,45 @@ from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
 from docx.shared import Inches, Pt, RGBColor
 
+from resume_generator.models import Resume
+
+__all__ = (
+    "BLACK",
+    "BLUE",
+    "GRAY",
+    "add_bullet",
+    "add_education",
+    "add_experience",
+    "add_header",
+    "add_heading",
+    "add_open_source",
+    "add_rule",
+    "add_skills",
+    "add_summary",
+    "add_text_line",
+    "build_docx",
+    "configure_document",
+    "export_pdf",
+    "set_font",
+    "set_para_spacing",
+    "soffice_path",
+)
+
+# Brand/accent color used for headings and the candidate name.
 BLUE = RGBColor(31, 78, 121)
+
+# Muted text color used for secondary metadata such as dates and contact details.
 GRAY = RGBColor(90, 90, 90)
+
+# Default text color for body copy.
 BLACK = RGBColor(20, 20, 20)
 
 
-def set_font(run, size=9.2, bold=False, italic=False, color=BLACK):
+def set_font(run, size: float = 9.2, bold: bool = False, italic: bool = False, color=BLACK) -> None:
+    """Apply the resume's base font styling to a python-docx run."""
+
     run.font.name = "Arial"
+    # python-docx does not set all Word font slots through ``font.name`` alone.
     run._element.rPr.rFonts.set(qn("w:ascii"), "Arial")
     run._element.rPr.rFonts.set(qn("w:hAnsi"), "Arial")
     run.font.size = Pt(size)
@@ -25,18 +60,24 @@ def set_font(run, size=9.2, bold=False, italic=False, color=BLACK):
     run.font.color.rgb = color
 
 
-def set_para_spacing(p, before=0, after=0, line=1.02):
+def set_para_spacing(p, before: float = 0, after: float = 0, line: float = 1.02) -> None:
+    """Apply compact paragraph spacing used throughout the one-page DOCX layout."""
+
     p.paragraph_format.space_before = Pt(before)
     p.paragraph_format.space_after = Pt(after)
     p.paragraph_format.line_spacing = line
 
 
-def add_rule(paragraph, color="D9E2EF"):
+def add_rule(paragraph, color: str = "D9E2EF") -> None:
+    """Add a bottom border rule to a paragraph via WordprocessingML."""
+
     p_pr = paragraph._p.get_or_add_pPr()
     p_bdr = p_pr.find(qn("w:pBdr"))
     if p_bdr is None:
         p_bdr = OxmlElement("w:pBdr")
         p_pr.append(p_bdr)
+    # python-docx has no high-level paragraph-border API, so this writes the
+    # underlying WordprocessingML that Word/LibreOffice expect.
     bottom = OxmlElement("w:bottom")
     bottom.set(qn("w:val"), "single")
     bottom.set(qn("w:sz"), "8")
@@ -45,7 +86,9 @@ def add_rule(paragraph, color="D9E2EF"):
     p_bdr.append(bottom)
 
 
-def add_heading(doc, text):
+def add_heading(doc, text: str):
+    """Add a blue uppercase section heading with an underline rule."""
+
     p = doc.add_paragraph()
     set_para_spacing(p, before=6, after=2, line=1.0)
     add_rule(p)
@@ -54,7 +97,9 @@ def add_heading(doc, text):
     return p
 
 
-def add_text_line(doc, parts, before=0, after=0, align=None):
+def add_text_line(doc, parts, before: float = 0, after: float = 0, align=None):
+    """Add one paragraph assembled from styled text parts."""
+
     p = doc.add_paragraph()
     if align is not None:
         p.alignment = align
@@ -71,7 +116,9 @@ def add_text_line(doc, parts, before=0, after=0, align=None):
     return p
 
 
-def add_bullet(doc, text, keep_with_next=False):
+def add_bullet(doc, text: str, keep_with_next: bool = False):
+    """Add a compact bullet paragraph to the document."""
+
     p = doc.add_paragraph(style="List Bullet")
     p.paragraph_format.left_indent = Inches(0.22)
     p.paragraph_format.first_line_indent = Inches(-0.14)
@@ -85,6 +132,8 @@ def add_bullet(doc, text, keep_with_next=False):
 
 
 def configure_document():
+    """Create a DOCX document with page geometry and base styles configured."""
+
     doc = Document()
     section = doc.sections[0]
     section.page_width = Inches(8.5)
@@ -98,13 +147,16 @@ def configure_document():
 
     styles = doc.styles
     styles["Normal"].font.name = "Arial"
+    # Match the explicit run-level font setup so Word does not substitute fonts.
     styles["Normal"]._element.rPr.rFonts.set(qn("w:ascii"), "Arial")
     styles["Normal"]._element.rPr.rFonts.set(qn("w:hAnsi"), "Arial")
     styles["Normal"].font.size = Pt(9.2)
     return doc
 
 
-def add_header(doc, resume):
+def add_header(doc, resume: Resume) -> None:
+    """Add candidate name, headline, and contact details."""
+
     title = doc.add_paragraph()
     title.alignment = WD_ALIGN_PARAGRAPH.CENTER
     set_para_spacing(title, before=0, after=0, line=1.0)
@@ -124,12 +176,16 @@ def add_header(doc, resume):
     set_font(r, size=8.4, color=GRAY)
 
 
-def add_summary(doc, resume):
+def add_summary(doc, resume: Resume) -> None:
+    """Add the summary section."""
+
     add_heading(doc, "Summary")
     add_text_line(doc, [(resume.variant.summary, {"size": 8.9})], after=1)
 
 
-def add_skills(doc, resume):
+def add_skills(doc, resume: Resume) -> None:
+    """Add the technical skills section."""
+
     add_heading(doc, "Technical Skills")
     for skill in resume.skills:
         add_text_line(
@@ -142,7 +198,9 @@ def add_skills(doc, resume):
         )
 
 
-def add_experience(doc, resume):
+def add_experience(doc, resume: Resume) -> None:
+    """Add company, role, and bullet entries."""
+
     add_heading(doc, "Experience")
     for company in resume.experience:
         company_p = add_text_line(
@@ -168,16 +226,21 @@ def add_experience(doc, resume):
             )
             title_p.paragraph_format.keep_with_next = True
             for index, bullet in enumerate(role.bullets):
+                # Keep the first bullet attached to its role heading when Word paginates.
                 add_bullet(doc, bullet, keep_with_next=index == 0 and len(role.bullets) > 1)
 
 
-def add_open_source(doc, resume):
+def add_open_source(doc, resume: Resume) -> None:
+    """Add the open-source section."""
+
     add_heading(doc, "Open Source")
     for bullet in resume.open_source:
         add_bullet(doc, bullet)
 
 
-def add_education(doc, resume):
+def add_education(doc, resume: Resume) -> None:
+    """Add the education section."""
+
     add_heading(doc, "Education")
     add_text_line(
         doc,
@@ -189,7 +252,9 @@ def add_education(doc, resume):
     )
 
 
-def build_docx(resume, out_dir):
+def build_docx(resume: Resume, out_dir: Union[str, Path]) -> Path:
+    """Write a DOCX resume variant into ``out_dir`` and return the path."""
+
     doc = configure_document()
     add_header(doc, resume)
     add_summary(doc, resume)
@@ -205,14 +270,19 @@ def build_docx(resume, out_dir):
     return out_path
 
 
-def soffice_path():
+def soffice_path() -> Optional[str]:
+    """Return the configured or discoverable LibreOffice executable path."""
+
     configured = os.environ.get("SOFFICE")
     if configured:
         return configured
     return shutil.which("soffice") or shutil.which("libreoffice")
 
 
-def export_pdf(docx_path):
+def export_pdf(docx_path: Union[str, Path]) -> Path:
+    """Export ``docx_path`` to PDF using headless LibreOffice."""
+
+    docx_path = Path(docx_path)
     soffice = soffice_path()
     if not soffice:
         raise RuntimeError("LibreOffice/soffice was not found; rerun with --no-pdf to skip PDF export.")
