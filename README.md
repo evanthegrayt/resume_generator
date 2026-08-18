@@ -213,6 +213,21 @@ dates = "1842 - 1843"
 text = "Translated technical notes."
 ```
 
+Required sections:
+
+- `contact`
+- `variants`
+
+Optional list sections:
+
+- `skills`
+- `experience`
+- `open_source`
+
+Optional single sections:
+
+- `education`
+
 Skills can be limited to specific variants:
 
 ```toml

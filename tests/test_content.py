@@ -50,3 +50,30 @@ def test_custom_resume_toml_can_define_its_own_variants(tmp_path):
     assert [skill.label for skill in research.skills] == ["Languages", "Research"]
     assert default.experience[0].roles[0].bullets[1] == "Documented a general algorithm."
     assert research.experience[0].roles[0].bullets[1] == "Documented the first published general algorithm."
+
+
+def test_open_source_section_can_be_omitted(tmp_path):
+    resume_path = write_custom_resume(tmp_path)
+    resume_path.write_text(
+        resume_path.read_text(encoding="utf-8").replace('[open_source]\nbullets = ["Published reusable notes."]\n\n', ""),
+        encoding="utf-8",
+    )
+
+    resume = build_resume_data("default", resume_path)
+
+    assert resume.open_source == []
+
+
+def test_education_section_can_be_omitted(tmp_path):
+    resume_path = write_custom_resume(tmp_path)
+    resume_path.write_text(
+        resume_path.read_text(encoding="utf-8").replace(
+            '[education]\nschool = "University of Examples"\nlocation = "London, UK"\ndetails = "Studied computation"\n\n',
+            "",
+        ),
+        encoding="utf-8",
+    )
+
+    resume = build_resume_data("default", resume_path)
+
+    assert resume.education is None
