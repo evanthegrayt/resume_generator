@@ -40,8 +40,8 @@ docx-no-pdf: $(INSTALL_STAMP)
 build: $(INSTALL_STAMP)
 	$(RESUME_GENERATOR)
 
-docs:
-	$(PYTHON) scripts/build_api_docs.py
+docs: $(INSTALL_STAMP)
+	$(BIN)/python scripts/build_api_docs.py
 
 test: $(INSTALL_STAMP)
 	$(BIN)/pytest

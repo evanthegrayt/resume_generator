@@ -25,6 +25,9 @@ resume-generator = "resume_generator.cli:main"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+[tool.setuptools.package-data]
+"resume_generator.data" = ["*.toml"]
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 testpaths = ["tests"]
