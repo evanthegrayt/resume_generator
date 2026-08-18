@@ -37,3 +37,20 @@ jobs:
 
       - name: Run linting
         run: ruff check .
+
+      - name: Check generated HTML is current
+        run: |
+          resume-generator --format html
+          git diff --exit-code -- docs/index.html || {
+            echo "::error::docs/index.html is stale. Run 'make html' and commit the generated file."
+            exit 1
+          }
+
+      - name: Smoke test DOCX generation
+        run: |
+          cat > /tmp/resume.private.toml <<'EOF'
+          [contact]
+          email = "ci@example.com"
+          phone = "555.555.5555"
+          EOF
+          resume-generator --format docx --no-pdf --contact-file /tmp/resume.private.toml
