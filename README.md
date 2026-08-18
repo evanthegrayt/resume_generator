@@ -18,9 +18,11 @@ artifacts.
 
 ## Why This Exists
 
-I maintain both a hosted resume and application-ready document resumes. This
-generator keeps the content model, output adapters, and publishing files in one
-place so the HTML and DOCX/PDF versions do not drift apart.
+I maintain both a [hosted
+resume](https://evanthegrayt.github.io/resume_generator/) and application-ready
+document resumes. This generator keeps the content model, output adapters, and
+publishing files in one place so the HTML and DOCX/PDF versions do not drift
+apart.
 
 Private contact information is not stored in source control. The public HTML
 resume uses public-safe contact details, while local document generation requires
