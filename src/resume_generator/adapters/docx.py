@@ -186,6 +186,9 @@ def add_summary(doc, resume: Resume) -> None:
 def add_skills(doc, resume: Resume) -> None:
     """Add the technical skills section."""
 
+    if not resume.skills:
+        return
+
     add_heading(doc, "Technical Skills")
     for skill in resume.skills:
         add_text_line(
@@ -200,6 +203,9 @@ def add_skills(doc, resume: Resume) -> None:
 
 def add_experience(doc, resume: Resume) -> None:
     """Add company, role, and bullet entries."""
+
+    if not resume.experience:
+        return
 
     add_heading(doc, "Experience")
     for company in resume.experience:
@@ -233,13 +239,19 @@ def add_experience(doc, resume: Resume) -> None:
 def add_open_source(doc, resume: Resume) -> None:
     """Add the open-source section."""
 
-    add_heading(doc, "Open Source")
+    if not resume.open_source:
+        return
+
+    add_heading(doc, "Open Source Projects")
     for bullet in resume.open_source:
         add_bullet(doc, bullet)
 
 
 def add_education(doc, resume: Resume) -> None:
     """Add the education section."""
+
+    if resume.education is None:
+        return
 
     add_heading(doc, "Education")
     add_text_line(

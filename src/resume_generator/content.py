@@ -109,7 +109,10 @@ def string_list(data: Mapping[str, Any], key: str) -> list[str]:
 def parse_open_source(data: Mapping[str, Any]) -> list[str]:
     """Build open-source section bullets from resume source data."""
 
-    return string_list(required_table(data, "open_source"), "bullets")
+    open_source = optional_table(data, "open_source")
+    if not open_source:
+        return []
+    return string_list(open_source, "bullets")
 
 
 def parse_contact(data: Mapping[str, Any]) -> Contact:
@@ -220,10 +223,12 @@ def parse_experience(data: Mapping[str, Any]) -> list[Company]:
     return parsed_companies
 
 
-def parse_education(data: Mapping[str, Any]) -> Education:
+def parse_education(data: Mapping[str, Any]) -> Optional[Education]:
     """Build education section data from resume source data."""
 
-    education = required_table(data, "education")
+    education = optional_table(data, "education")
+    if not education:
+        return None
     return Education(
         school=string_field(education, "school"),
         location=string_field(education, "location"),

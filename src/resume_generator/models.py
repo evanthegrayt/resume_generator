@@ -7,7 +7,7 @@ adapter.
 
 from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
-from typing import Union
+from typing import Optional, Union
 
 __all__ = (
     "Company",
@@ -206,7 +206,7 @@ class Resume:
         skills: Technical skills rows.
         experience: Render-ready experience entries.
         open_source: Open-source contribution bullets.
-        education: Education section content.
+        education: Education section content, if present.
     """
 
     contact: Contact
@@ -214,7 +214,7 @@ class Resume:
     skills: list[SkillRow]
     experience: list[ResolvedCompany]
     open_source: list[str]
-    education: Education
+    education: Optional[Education]
 
 
 def resolve_text(text: ResumeText, variant: str) -> str:

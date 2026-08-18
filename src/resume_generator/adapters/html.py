@@ -37,6 +37,18 @@ def section(title: str, body: str, left_class: str = "") -> str:
       </div>"""
 
 
+def optional_section(title: str, body: str, left_class: str = "") -> str:
+    """Render a section with surrounding spacing when ``body`` is present."""
+
+    if not body:
+        return ""
+    return f"""
+      <div class="after-floats"></div>
+
+{section(title, body, left_class=left_class)}
+"""
+
+
 def render_summary(resume: Resume) -> str:
     """Render the summary paragraph and public profile links."""
 
@@ -63,6 +75,9 @@ def render_summary(resume: Resume) -> str:
 def render_skills(resume: Resume) -> str:
     """Render the technical skills list."""
 
+    if not resume.skills:
+        return ""
+
     rows = "\n".join(f"            <li>{escape(skill.label)}: {escape(skill.value)}</li>" for skill in resume.skills)
     return f"""          <h3 class="list-header">Technical Skills</h3>
 
@@ -73,6 +88,9 @@ def render_skills(resume: Resume) -> str:
 
 def render_experience(resume: Resume) -> str:
     """Render all companies, roles, and impact bullets."""
+
+    if not resume.experience:
+        return ""
 
     blocks = []
     for company in resume.experience:
@@ -107,6 +125,9 @@ def render_experience(resume: Resume) -> str:
 def render_open_source(resume: Resume) -> str:
     """Render open-source contribution bullets."""
 
+    if not resume.open_source:
+        return ""
+
     rows = "\n\n".join(
         f"""            <li>
               {escape(bullet)}
@@ -120,6 +141,9 @@ def render_open_source(resume: Resume) -> str:
 
 def render_education(resume: Resume) -> str:
     """Render the education section."""
+
+    if resume.education is None:
+        return ""
 
     return f"""          <h3 class="employer">{escape(resume.education.school)} | {escape(resume.education.location)}</h3>
 
@@ -151,22 +175,10 @@ def render_html(resume: Resume) -> str:
       <h1 class="main-heading">{escape(resume.contact.name)}</h1>
 
 {section("Summary", render_summary(resume))}
-
-      <div class="after-floats"></div>
-
-{section("Experience", render_experience(resume))}
-
-      <div class="after-floats"></div>
-
-{section("Open Source", render_open_source(resume))}
-
-      <div class="after-floats"></div>
-
-{section("Education", render_education(resume), left_class="education")}
-
-      <div class="after-floats"></div>
-
-{section("Skills", render_skills(resume))}
+{optional_section("Experience", render_experience(resume))}
+{optional_section("Open Source Projects", render_open_source(resume))}
+{optional_section("Education", render_education(resume), left_class="education")}
+{optional_section("Skills", render_skills(resume))}
     </div>
   </body>
 </html>
