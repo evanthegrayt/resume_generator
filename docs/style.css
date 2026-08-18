@@ -1,0 +1,147 @@
+/* Resume Style Sheet */
+
+.base-outline {
+  border:           10px solid #2d2d2d;
+  margin:           10px auto;
+  width:            80%;
+  max-width:        800px;
+  padding:          1%;
+  font-size:        12px;
+  font-family:      'Noto Sans KR', sans-serif;
+}
+
+.list {
+  margin:           0 0 20px;
+}
+
+.main-heading {
+  margin:           20px 0 10px;
+  font-size:        3.0em;
+  font-weight:      700;
+  text-transform:   capitalize;
+  text-align:       center;
+  text-shadow:      2px 2px rgba(161, 173, 178, 0.5);
+}
+
+.intro {
+  margin:           6px 0;
+  text-align:       justify;
+}
+
+.header-left {
+  text-align:       center;
+  font-size:        1.2rem;
+  padding:          0 5px;
+  margin:           1px 5px;
+  text-decoration:  underline;
+  text-shadow:      1px 1px rgba(161, 173, 178, 0.5);
+}
+
+.employer {
+  text-align:       center;
+  margin:           2px 2px 0;
+  padding:          5px 0;
+  font-size:        15px;
+}
+
+.position-held {
+  text-align:       center;
+  margin:           0;
+  padding:          0 2px 2px;
+  font-weight:      400;
+}
+
+.date {
+  text-align:       center;
+  margin:           0;
+  padding:          0 2px;
+  font-size:        0.80em;
+  text-transform:   capitalize;
+  color:            rgb(161, 173, 178);
+}
+
+.section {
+  border:           2px solid rgba(161, 173, 178, 0.5);
+  padding:          2px;
+  margin:           4px 0;
+  overflow:         hidden;
+  display:          flex;
+  flex-direction:   column;
+  justify-content:  center;
+}
+
+.right-margin {
+  padding:          0 5px;
+}
+
+.duties {
+  margin:           0 20px 5px 0;
+  text-align:       justify;
+}
+
+.link {
+  text-decoration:  none;
+  font-weight:      700;
+  color:            #2d2d2d;
+}
+
+.link:hover {
+  text-decoration:  underline;
+  color:            #539ef4;
+}
+
+.link:hover:visited {
+  text-decoration:  underline;
+  color:            #9953f4;
+}
+
+@media only screen and (min-width: 768px) {
+  .section {
+    flex-direction:   row;
+  }
+
+  .left-margin {
+    width:            20%;
+  }
+
+  .right-margin {
+    width:            80%;
+    border-left:      1px solid rgba(161, 173, 178, 0.5);
+  }
+
+  .skills {
+    columns:          2;
+    -webkit-columns:  2;
+    -moz-columns:     2;
+  }
+
+  .list-header {
+    margin:           10px 0;
+  }
+
+  .date {
+    float:            right;
+  }
+
+  .position-held {
+    float:            left;
+  }
+
+  .after-floats {
+    clear:            both;
+  }
+
+  .base-outline {
+    border:           20px solid #2d2d2d;
+    margin:           20px auto;
+  }
+
+  .header-left {
+    text-align:       left;
+    text-decoration:  none;
+  }
+
+  .employer {
+    text-align:       left;
+  }
+}

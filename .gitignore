@@ -1,0 +1,14 @@
+# OpenOffice/LibreOffice lockfiles
+.~lock.*#
+
+# Local private resume data
+resume.private.toml
+docs/downloads/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.venv/
