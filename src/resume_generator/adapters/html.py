@@ -1,8 +1,26 @@
+"""HTML rendering adapter for the public GitHub Pages resume."""
+
 from html import escape
 from pathlib import Path
+from typing import Union
+
+from resume_generator.models import Resume
+
+__all__ = (
+    "build_html",
+    "render_education",
+    "render_experience",
+    "render_html",
+    "render_open_source",
+    "render_skills",
+    "render_summary",
+    "section",
+)
 
 
-def section(title, body, left_class=""):
+def section(title: str, body: str, left_class: str = "") -> str:
+    """Render a legacy two-column resume section."""
+
     left_classes = "left-margin"
     if left_class:
         left_classes = f"{left_classes} {left_class}"
@@ -19,7 +37,9 @@ def section(title, body, left_class=""):
       </div>"""
 
 
-def render_summary(resume):
+def render_summary(resume: Resume) -> str:
+    """Render the summary paragraph and public profile links."""
+
     return f"""          <p class="intro">
             {escape(resume.variant.summary)}
             <br>
@@ -40,7 +60,9 @@ def render_summary(resume):
           </p>"""
 
 
-def render_skills(resume):
+def render_skills(resume: Resume) -> str:
+    """Render the technical skills list."""
+
     rows = "\n".join(f"            <li>{escape(skill.label)}: {escape(skill.value)}</li>" for skill in resume.skills)
     return f"""          <h3 class="list-header">Technical Skills</h3>
 
@@ -49,7 +71,9 @@ def render_skills(resume):
           </ul>"""
 
 
-def render_experience(resume):
+def render_experience(resume: Resume) -> str:
+    """Render all companies, roles, and impact bullets."""
+
     blocks = []
     for company in resume.experience:
         role_blocks = []
@@ -80,7 +104,9 @@ def render_experience(resume):
     return "\n".join(blocks)
 
 
-def render_open_source(resume):
+def render_open_source(resume: Resume) -> str:
+    """Render open-source contribution bullets."""
+
     rows = "\n\n".join(
         f"""            <li>
               {escape(bullet)}
@@ -92,7 +118,9 @@ def render_open_source(resume):
           </ul>"""
 
 
-def render_education(resume):
+def render_education(resume: Resume) -> str:
+    """Render the education section."""
+
     return f"""          <h3 class="employer">{escape(resume.education.school)} | {escape(resume.education.location)}</h3>
 
           <h4 class="position-held">{escape(resume.education.details)}</h4>
@@ -100,7 +128,9 @@ def render_education(resume):
           <div class="after-floats"></div>"""
 
 
-def render_html(resume):
+def render_html(resume: Resume) -> str:
+    """Render the complete public resume HTML document."""
+
     return f"""<!DOCTYPE html>
 <!-- If you're interested, you can view this online at
   https://evanthegrayt.github.io/evanthegrayt/resume/ -->
@@ -143,7 +173,9 @@ def render_html(resume):
 """
 
 
-def build_html(resume, out_path):
+def build_html(resume: Resume, out_path: Union[str, Path]) -> Path:
+    """Write the rendered HTML resume to ``out_path`` and return the path."""
+
     out_path = Path(out_path)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(render_html(resume), encoding="utf-8")

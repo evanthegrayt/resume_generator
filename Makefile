@@ -6,7 +6,7 @@ RESUME_GENERATOR := $(BIN)/resume-generator
 
 .DEFAULT_GOAL := help
 
-.PHONY: help setup html docx docx-no-pdf build test lint check
+.PHONY: help setup html docx docx-no-pdf build docs test lint check
 
 help:
 	@printf "Resume generator commands:\n"
@@ -15,6 +15,7 @@ help:
 	@printf "  make docx        Build local DOCX/PDF files\n"
 	@printf "  make docx-no-pdf Build local DOCX files only\n"
 	@printf "  make build       Build HTML and local DOCX/PDF files\n"
+	@printf "  make docs        Build pydoc API documentation\n"
 	@printf "  make test        Run pytest\n"
 	@printf "  make lint        Run ruff\n"
 	@printf "  make check       Run tests and linting\n"
@@ -38,6 +39,9 @@ docx-no-pdf: $(INSTALL_STAMP)
 
 build: $(INSTALL_STAMP)
 	$(RESUME_GENERATOR)
+
+docs:
+	$(PYTHON) scripts/build_api_docs.py
 
 test: $(INSTALL_STAMP)
 	$(BIN)/pytest

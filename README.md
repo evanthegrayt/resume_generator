@@ -33,6 +33,9 @@ src/resume_generator/
   models.py          # typed resume data objects
   private_contact.py # local-only contact override loading
 
+scripts/
+  build_api_docs.py  # pydoc HTML generation
+
 docs/
   index.html         # tracked GitHub Pages resume
   style.css          # tracked legacy resume stylesheet
@@ -170,6 +173,28 @@ make check
 ```
 
 Run both before committing generated HTML or source changes.
+
+## API Documentation
+
+Python includes `pydoc` in the standard library. This project uses it for
+lightweight API documentation generated from module, class, and function
+docstrings:
+
+```sh
+make docs
+```
+
+This writes static HTML API documentation to:
+
+```text
+docs/api/index.html
+```
+
+You can also inspect the same docs directly from the command line:
+
+```sh
+.venv/bin/python -m pydoc resume_generator.models
+```
 
 ## Privacy Model
 

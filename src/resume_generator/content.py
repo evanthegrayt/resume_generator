@@ -1,3 +1,10 @@
+"""Canonical resume content and variant assembly.
+
+This module is intentionally data-heavy: it stores the public-safe source of
+truth for resume copy, plus the small amount of logic needed to build each
+renderable variant.
+"""
+
 from resume_generator.models import (
     Company,
     Contact,
@@ -9,6 +16,17 @@ from resume_generator.models import (
     VariantText,
 )
 
+__all__ = (
+    "CONTACT",
+    "EDUCATION",
+    "EXPERIENCE",
+    "OPEN_SOURCE",
+    "VARIANTS",
+    "build_resume_data",
+    "skill_rows",
+)
+
+# Public-safe contact details used for the hosted HTML resume.
 CONTACT = Contact(
     name="Evan Gray",
     location="Edmond, OK",
@@ -18,6 +36,7 @@ CONTACT = Contact(
     github="github.com/evanthegrayt",
 )
 
+# Resume positioning options exposed by the CLI.
 VARIANTS = {
     "general": Variant(
         name="general",
@@ -44,7 +63,9 @@ VARIANTS = {
 }
 
 
-def skill_rows(variant):
+def skill_rows(variant: str) -> list[SkillRow]:
+    """Return technical skill rows tailored to ``variant``."""
+
     shared = [
         SkillRow("Languages", "Ruby, SQL, JavaScript/TypeScript, Python, PHP, C#, Shell Scripting, VimScript"),
         SkillRow("Frameworks", "Ruby on Rails 5-8, React, Hotwire/Turbo/Stimulus, Django, Laravel, .NET, Graphiti"),
@@ -66,6 +87,7 @@ def skill_rows(variant):
     ]
 
 
+# Work-history entries in reverse chronological order.
 EXPERIENCE = [
     Company(
         "Yolk Labs",
@@ -199,12 +221,14 @@ EXPERIENCE = [
     ),
 ]
 
+# Public project and open-source contribution bullets.
 OPEN_SOURCE = [
     "Maintain 30+ documented, installable open-source projects at github.com/evanthegrayt, emphasizing developer productivity, automation, testing, and clear installation/usage documentation.",
     "Built Planter, a Rails seeding/import RubyGem extracted from production work, and cdc, a zsh/bash directory-jump plugin with tab completion and session history.",
     "Build and publish small developer tools, Vim plugins, shell utilities, and AI-agent workflow templates to reduce repetitive work and share practical patterns with other developers.",
 ]
 
+# Short education section for all variants.
 EDUCATION = Education(
     school="University of Central Oklahoma",
     location="Edmond, OK",
@@ -212,7 +236,9 @@ EDUCATION = Education(
 )
 
 
-def build_resume_data(variant):
+def build_resume_data(variant: str) -> Resume:
+    """Build a complete, render-ready resume for ``variant``."""
+
     variant_config = VARIANTS[variant]
     return Resume(
         contact=CONTACT,
