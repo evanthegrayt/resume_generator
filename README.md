@@ -1,4 +1,9 @@
 # Resume Generator
+[![Language: Python](https://img.shields.io/static/v1?label=language&message=Python&color=3776AB&style=flat&logo=python&logoColor=3776AB)](https://www.python.org/)
+[![Python: 3.9+](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
+[![Lint: Ruff](https://img.shields.io/badge/lint-Ruff-46a3ff.svg)](https://docs.astral.sh/ruff/)
+[![Tests](https://github.com/evanthegrayt/resume_generator/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/evanthegrayt/resume_generator/actions/workflows/tests.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 An installable Python project that keeps my resume content in one source of
 truth and renders it into multiple formats:
