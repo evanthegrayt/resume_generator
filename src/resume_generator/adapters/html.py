@@ -133,7 +133,7 @@ def render_html(resume: Resume) -> str:
 
     return f"""<!DOCTYPE html>
 <!-- If you're interested, you can view this online at
-  https://evanthegrayt.github.io/evanthegrayt/resume/ -->
+  https://evanthegrayt.github.io/resume_generator/ -->
 <html>
   <head>
     <title>Evan Gray's (Responsive!) Resume</title>

@@ -1,6 +1,10 @@
 # OpenOffice/LibreOffice lockfiles
 .~lock.*#
 
+# Local OS/editor artifacts
+.DS_Store
+tags
+
 # Local private resume data
 resume.private.toml
 docs/downloads/
