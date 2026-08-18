@@ -11,7 +11,7 @@ from pathlib import Path
 # Repository root used to convert generated source links into publishable paths.
 ROOT_DIR = Path(__file__).resolve().parents[1]
 
-# Source directory inserted so docs can be generated without installing the package first.
+# Source directory inserted so docs can inspect local code before installation metadata catches up.
 SRC_DIR = ROOT_DIR / "src"
 
 # Destination directory served alongside the GitHub Pages resume.
@@ -26,6 +26,7 @@ MODULES = [
     "resume_generator.adapters.html",
     "resume_generator.cli",
     "resume_generator.content",
+    "resume_generator.data",
     "resume_generator.models",
     "resume_generator.private_contact",
 ]
@@ -82,11 +83,6 @@ def install_module_stub(name: str, **attributes) -> None:
 
 def install_optional_dependency_stubs() -> None:
     """Provide import-only stubs for dependencies that pydoc does not execute."""
-
-    try:
-        import tomli  # noqa: F401
-    except ModuleNotFoundError:
-        install_module_stub("tomli", loads=PydocStub("tomli.loads"))
 
     try:
         import docx  # noqa: F401

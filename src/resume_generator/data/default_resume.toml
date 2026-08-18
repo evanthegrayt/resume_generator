@@ -1,0 +1,227 @@
+[contact]
+name = "Evan Gray"
+location = "Edmond, OK"
+linkedin = "linkedin.com/in/evanthegrayt"
+github = "github.com/evanthegrayt"
+
+[variants.general]
+stem = "evan-gray-resume-general"
+headline = "Senior Software Engineer | Legacy Modernization, Backend Systems, and Product Delivery"
+summary = "Senior Software Engineer focused on backend systems, object-oriented design, and product-minded legacy modernization. Known for joining stalled, high-risk software efforts, creating technical and product clarity, adding testing and delivery safeguards, and shipping maintainable releases across Ruby/Rails, .NET, React, Python/Django, SQL Server, and PostgreSQL environments. 11+ years building production software and 20+ years across IT, systems, support, and software delivery."
+
+[variants.rails]
+stem = "evan-gray-resume-rails"
+headline = "Senior Software Engineer | Ruby/Rails, Legacy Modernization, and Product Delivery"
+summary = "Senior Software Engineer focused on Ruby/Rails, object-oriented design, and product-minded legacy modernization. Known for joining stalled, high-risk software efforts, creating technical and product clarity, adding testing and delivery safeguards, and shipping maintainable releases. 11+ years building production software and 20+ years across IT, systems, support, and software delivery, with deep experience in Rails APIs, data-heavy workflows, stakeholder discovery, production support, and mentoring."
+
+[[skills]]
+label = "Languages"
+value = "Ruby, SQL, JavaScript/TypeScript, Python, PHP, C#, Shell Scripting, VimScript"
+
+[[skills]]
+label = "Frameworks"
+value = "Ruby on Rails 5-8, React, Hotwire/Turbo/Stimulus, Django, Laravel, .NET, Graphiti"
+
+[[skills]]
+label = "Backend"
+value = "Ruby/Rails, REST APIs, background jobs, Rake tasks, RubyGems, authorization, service/data modeling"
+variants = ["general"]
+
+[[skills]]
+label = "Rails"
+value = "ActiveJob, ActionCable, Devise, Pundit, CanCanCan, Sidekiq, Resque, Rake tasks, Bullet, RubyGems"
+variants = ["rails"]
+
+[[skills]]
+label = "Data/APIs"
+value = "PostgreSQL, MySQL, SQL Server, Redis, Elasticsearch, MongoDB, GraphQL/Hasura, DBML/data modeling"
+
+[[skills]]
+label = "Cloud/DevOps"
+value = "AWS (S3, application hosting, logging), Docker, Vagrant, Git, GitHub, GitLab, Azure DevOps, CI/CD"
+
+[[skills]]
+label = "Testing"
+value = "RSpec, Minitest, Test::Unit, Jest, Cypress, PHPUnit, Bats, CI linting, smoke testing"
+
+[[skills]]
+label = "Security"
+value = "SOC 2 environments, PII/SSN data handling, role-based permissions, production data scrubbing"
+
+[[skills]]
+label = "Leadership"
+value = "architecture, mentoring, product ownership, Scrum, stakeholder discovery, RCA writing, AI-assisted development"
+
+[open_source]
+bullets = [
+  "Maintain 30+ documented, installable open-source projects at github.com/evanthegrayt, emphasizing developer productivity, automation, testing, and clear installation/usage documentation.",
+  "Built Planter, a Rails seeding/import RubyGem extracted from production work, and cdc, a zsh/bash directory-jump plugin with tab completion and session history.",
+  "Build and publish small developer tools, Vim plugins, shell utilities, and AI-agent workflow templates to reduce repetitive work and share practical patterns with other developers.",
+]
+
+[education]
+school = "University of Central Oklahoma"
+location = "Edmond, OK"
+details = "Studied Psychology"
+
+[[experience]]
+name = "Yolk Labs"
+location = "Austin, TX"
+
+[[experience.roles]]
+title = "Senior Software Engineer, Remote Contract"
+dates = "Jun. 2026 - Present"
+
+[[experience.roles.bullets]]
+text = "Modernized a mature oil and gas platform by upgrading end-of-life React, Node.js, and .NET versions back to supported LTS releases, reducing technical debt and improving maintainability."
+
+[[experience.roles.bullets]]
+text = "Took ownership of a stale web-app feature after more than a year of slow feedback cycles, led stakeholder/end-user discovery, and helped ship it within the first month."
+
+[[experience.roles.bullets]]
+text = "Deliver full-stack enhancements across React, C#/.NET, and SQL Server while consolidating legacy Oracle-backed workflows into a centralized application."
+
+[[experience.roles.bullets]]
+text = "Provide production support through a direct senior-user feedback channel, often turning urgent product feedback into same-hour fixes; introduce smoke testing to make legacy changes safer."
+
+[[experience]]
+name = "Benefitbay"
+location = "Kansas City, MO"
+
+[[experience.roles]]
+title = "Engineering Manager, Remote Full Time"
+dates = "Mar. 2025 - Oct. 2025"
+
+[[experience.roles.bullets]]
+text = "Managed delivery for an enterprise Ruby on Rails application serving 80,000+ users, leading 3 US engineers, 1 QA engineer, 3 EU contract engineers, and 1 EU DevOps engineer."
+
+[[experience.roles.bullets]]
+text = "Owned feature-request translation with the Director of Engineering, introducing issue templates and scoped tickets that made PRs smaller, reviews more consistent, and releases more predictable."
+
+[[experience.roles.bullets]]
+text = "Operated as a hands-on engineering/product leader across production support, on-call escalation, RCA writeups, bug fixes, PR review, architecture discussions, and product design meetings."
+
+[[experience.roles.bullets]]
+text = "Led engineering standardization sessions around design patterns, AI-assisted development, and review practices to improve shared technical judgment across a distributed team."
+
+[[experience.roles.bullets]]
+text = "Implemented user acceptance testing and AI-assisted development standards, bringing decision-maker feedback and approved agent/tool practices into delivery without bypassing engineering review."
+
+[[experience]]
+name = "Mortgage Connect Risk Solutions"
+location = "Edmond, OK"
+
+[[experience.roles]]
+title = "Senior Software Engineer, Product-Focused, Remote Full Time"
+dates = "Apr. 2024 - Mar. 2025"
+
+[[experience.roles.bullets]]
+text = "Served as technical/product lead for contractors replacing mission-critical C/Motif systems with modular Django, NuxtJS, and AWS applications spanning internal operations, reporting, and file workflows."
+
+[[experience.roles.bullets]]
+text = "Decomposed tightly coupled legacy workflows into modular replacement paths, preserving accuracy across business-critical internal operations such as reporting, accounting, payroll, and file processing."
+
+[[experience.roles.bullets]]
+text = "Migrated developers and internal stakeholders to Azure DevOps, Scrum, issue templates, PR guidelines, and code standards, reducing unreviewable change sets and improving first-release correctness."
+
+[[experience.roles.bullets]]
+text = "Owned backlog priority, user stories, code quality, and delivery alignment for a client-facing Ruby on Rails application with 100,000+ users."
+
+[[experience.roles.bullets]]
+text = "Partnered with executives and offshore contractors on architecture, roadmap alignment, RCA writeups, Scrum ceremonies, and post-launch technical ownership for PII-sensitive workflows."
+
+[[experience]]
+name = "Public Strategies"
+location = "Oklahoma City, OK"
+
+[[experience.roles]]
+title = "Product Software Engineer & Data Team Manager, Hybrid Full Time"
+dates = "Apr. 2023 - Mar. 2024"
+
+[[experience.roles.bullets]]
+text = "Promoted to manage delivery across a 6-person data/product group, including 4 direct reports, MS Dynamics engineers, a Power BI specialist, and PM/BA partners."
+
+[[experience.roles.bullets]]
+text = "Took over an underused Microsoft Dynamics investment, introduced Scrum/discovery process, and enabled CRM adoption, custom application delivery, and migration of marketing workflows from Mailchimp."
+
+[[experience.roles.bullets]]
+text = "Oversaw Rails and Microsoft Dynamics work for permission-sensitive participant data, CMS/CRM, reporting, event management, and custom applications supporting 3 programs and several thousand users."
+
+[[experience.roles]]
+title = "Senior Software Engineer, Hybrid Full Time"
+dates = "Aug. 2022 - Apr. 2023"
+
+[[experience.roles.bullets]]
+text = "Took over a stalled participant mobile-app backend after roughly 2 years of slow progress, finished the API/database work, and supported release within 6 months."
+
+[experience.roles.bullets.variants]
+rails = "Took over a stalled participant mobile-app backend after roughly 2 years of slow progress, finished the Rails API/database work, and supported release within 6 months."
+
+[[experience.roles.bullets]]
+text = "Delivered backend APIs and data models for participant engagement features including workshop schedules, attendance tracking, rewards, gas-card workflows, and program content."
+
+[[experience.roles.bullets]]
+text = "Designed data architecture with DBML/dbdiagram.io, added CI/linting and test-readiness safeguards, and used Bullet to identify N+1 queries before refactoring data-heavy flows."
+
+[experience.roles.bullets.variants]
+rails = "Designed Rails data architecture with DBML/dbdiagram.io, added CI/linting and test-readiness safeguards, and used Bullet to identify N+1 queries before refactoring data-heavy flows."
+
+[[experience.roles.bullets]]
+text = "Partnered with DevOps on application/AWS integration, including secrets, CI readiness, Rake tasks, data/schema dumps, imports, CSV seeding, and developer tooling."
+
+[experience.roles.bullets.variants]
+rails = "Partnered with DevOps on Rails/AWS integration, including secrets, CI readiness, Rake tasks, data/schema dumps, imports, CSV seeding, and developer tooling."
+
+[[experience]]
+name = "Weedmaps"
+location = "Irvine, CA"
+
+[[experience.roles]]
+title = "Software Engineer III, Remote Full Time"
+dates = "Feb. 2022 - Aug. 2022"
+
+[[experience.roles.bullets]]
+text = "Supported ad campaign creation and management for a high-volume marketplace with 1,000,000+ active users."
+
+[[experience.roles.bullets]]
+text = "Built a Graphiti REST adapter around a GraphQL/Hasura advertisement platform, allowing REST clients to consume ad-server CRUD operations through a safer, consistent API layer."
+
+[[experience.roles.bullets]]
+text = "Unblocked deadline-risk Best of Weedmaps 2022 work by clearing campaign technical debt and making yearly winner/trophy data reusable across web and native experiences."
+
+[[experience]]
+name = "Public Strategies"
+location = "Oklahoma City, OK"
+
+[[experience.roles]]
+title = "Software Engineer, Hybrid Full Time"
+dates = "Aug. 2019 - Feb. 2022"
+
+[[experience.roles.bullets]]
+text = "Helped move a non-version-controlled PHP/SFTP production workflow into Laravel and then Ruby on Rails, eliminating direct production-file overwrites and improving maintainability."
+
+[[experience.roles.bullets]]
+text = "Built Rails APIs, Rails admin interfaces, and React + TypeScript front ends for reporting, data visualization, event calendars, webinar/podcast content, and client-managed organizational profiles."
+
+[[experience.roles.bullets]]
+text = "Built Planter as an internal Rails seeding/import framework for CSV-driven data setup, then extracted it into an open-source RubyGem."
+
+[[experience]]
+name = "ADFITECH, Inc."
+location = "Edmond, OK"
+
+[[experience.roles]]
+title = "Desktop and Web Application Developer, Hybrid Full Time"
+dates = "Sep. 2015 - Aug. 2019"
+
+[[experience.roles.bullets]]
+text = "Built Ruby/GTK workflow applications for roughly 300 internal users, routing loan data, images, audit findings, and department handoffs through Ruleby-based business rules and Redis-backed processing."
+
+[[experience.roles.bullets]]
+text = "Single-handedly rebuilt a rigid C-based loan selection process in Ruby, moving selection criteria into configuration and reducing the workflow from 3+ people to one part-time user."
+
+[[experience.roles.bullets]]
+text = "Built Redis-backed background jobs for reports and asynchronous workflows; maintained legacy C/PHP systems and data scrubbers for PII/SSN-safe lower environments."
+
+[[experience.roles.bullets]]
+text = "Trained junior developers in object-oriented Ruby, GitLab merge requests, command-line workflows, and common development practices; earlier roles included Jr. System Administrator, Technical Support, and Data/Image Import Specialist."

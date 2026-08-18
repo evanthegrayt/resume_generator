@@ -1,9 +1,15 @@
-"""Canonical resume content and variant assembly.
+"""Resume TOML loading and variant assembly.
 
-This module is intentionally data-heavy: it stores the public-safe source of
-truth for resume copy, plus the small amount of logic needed to build each
-renderable variant.
+The renderers work with dataclasses from :mod:`resume_generator.models`. This
+module owns the translation from editable TOML resume data into those internal
+objects.
 """
+
+from collections.abc import Mapping
+from functools import lru_cache
+from importlib.resources import files
+from pathlib import Path
+from typing import Any, Optional, Union
 
 from resume_generator.models import (
     Company,
@@ -16,235 +22,248 @@ from resume_generator.models import (
     VariantText,
 )
 
+try:
+    import tomllib
+except ModuleNotFoundError:  # pragma: no cover - exercised on Python < 3.11
+    import tomli as tomllib
+
 __all__ = (
     "CONTACT",
+    "DEFAULT_RESUME_RESOURCE",
     "EDUCATION",
     "EXPERIENCE",
     "OPEN_SOURCE",
     "VARIANTS",
+    "available_variants",
     "build_resume_data",
+    "load_resume_source",
     "skill_rows",
 )
 
-# Public-safe contact details used for the hosted HTML resume.
-CONTACT = Contact(
-    name="Evan Gray",
-    location="Edmond, OK",
-    phone="",
-    email="",
-    linkedin="linkedin.com/in/evanthegrayt",
-    github="github.com/evanthegrayt",
-)
-
-# Resume positioning options exposed by the CLI.
-VARIANTS = {
-    "general": Variant(
-        name="general",
-        stem="evan-gray-resume-general",
-        headline="Senior Software Engineer | Legacy Modernization, Backend Systems, and Product Delivery",
-        summary=(
-            "Senior Software Engineer focused on backend systems, object-oriented design, and product-minded legacy modernization. "
-            "Known for joining stalled, high-risk software efforts, creating technical and product clarity, adding testing and delivery safeguards, "
-            "and shipping maintainable releases across Ruby/Rails, .NET, React, Python/Django, SQL Server, and PostgreSQL environments. "
-            "11+ years building production software and 20+ years across IT, systems, support, and software delivery."
-        ),
-    ),
-    "rails": Variant(
-        name="rails",
-        stem="evan-gray-resume-rails",
-        headline="Senior Software Engineer | Ruby/Rails, Legacy Modernization, and Product Delivery",
-        summary=(
-            "Senior Software Engineer focused on Ruby/Rails, object-oriented design, and product-minded legacy modernization. "
-            "Known for joining stalled, high-risk software efforts, creating technical and product clarity, adding testing and delivery safeguards, "
-            "and shipping maintainable releases. 11+ years building production software and 20+ years across IT, systems, support, and software "
-            "delivery, with deep experience in Rails APIs, data-heavy workflows, stakeholder discovery, production support, and mentoring."
-        ),
-    ),
-}
+# Packaged TOML resume used when the CLI does not receive ``--input``.
+DEFAULT_RESUME_RESOURCE = "default_resume.toml"
 
 
-def skill_rows(variant: str) -> list[SkillRow]:
+def load_resume_source(path: Optional[Union[str, Path]] = None) -> dict[str, Any]:
+    """Load resume source data from ``path`` or the packaged default TOML file."""
+
+    if path is None:
+        data = files("resume_generator.data").joinpath(DEFAULT_RESUME_RESOURCE).read_text(encoding="utf-8")
+    else:
+        data = Path(path).read_text(encoding="utf-8")
+    return tomllib.loads(data)
+
+
+@lru_cache(maxsize=1)
+def _default_source() -> dict[str, Any]:
+    """Return cached source data for the packaged default resume."""
+
+    return load_resume_source()
+
+
+def required_table(data: Mapping[str, Any], key: str) -> Mapping[str, Any]:
+    """Return a required TOML table from ``data``."""
+
+    value = data.get(key)
+    if not isinstance(value, Mapping):
+        raise ValueError(f"{key} must be a table")
+    return value
+
+
+def optional_table(data: Mapping[str, Any], key: str) -> Mapping[str, Any]:
+    """Return an optional TOML table from ``data``."""
+
+    value = data.get(key, {})
+    if not isinstance(value, Mapping):
+        raise ValueError(f"{key} must be a table")
+    return value
+
+
+def string_field(data: Mapping[str, Any], key: str) -> str:
+    """Return a required string value from a TOML table."""
+
+    value = data.get(key)
+    if not isinstance(value, str):
+        raise ValueError(f"{key} must be a string")
+    return value
+
+
+def optional_string_field(data: Mapping[str, Any], key: str) -> str:
+    """Return an optional string value from a TOML table, defaulting to blank."""
+
+    value = data.get(key, "")
+    if not isinstance(value, str):
+        raise ValueError(f"{key} must be a string")
+    return value
+
+
+def string_list(data: Mapping[str, Any], key: str) -> list[str]:
+    """Return a required list of strings from a TOML table."""
+
+    value = data.get(key)
+    if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+        raise ValueError(f"{key} must be a list of strings")
+    return value
+
+
+def parse_open_source(data: Mapping[str, Any]) -> list[str]:
+    """Build open-source section bullets from resume source data."""
+
+    return string_list(required_table(data, "open_source"), "bullets")
+
+
+def parse_contact(data: Mapping[str, Any]) -> Contact:
+    """Build contact details from resume source data."""
+
+    contact = required_table(data, "contact")
+    return Contact(
+        name=string_field(contact, "name"),
+        location=string_field(contact, "location"),
+        phone=optional_string_field(contact, "phone"),
+        email=optional_string_field(contact, "email"),
+        linkedin=optional_string_field(contact, "linkedin"),
+        github=optional_string_field(contact, "github"),
+    )
+
+
+def parse_variants(data: Mapping[str, Any]) -> dict[str, Variant]:
+    """Build available resume variants from resume source data."""
+
+    variants = required_table(data, "variants")
+    parsed = {}
+    for name, variant_data in variants.items():
+        if not isinstance(variant_data, Mapping):
+            raise ValueError(f"variants.{name} must be a table")
+        parsed[name] = Variant(
+            name=name,
+            stem=string_field(variant_data, "stem"),
+            headline=string_field(variant_data, "headline"),
+            summary=string_field(variant_data, "summary"),
+        )
+    if not parsed:
+        raise ValueError("variants must define at least one variant")
+    return parsed
+
+
+def parse_skill_rows(data: Mapping[str, Any], variant: str) -> list[SkillRow]:
+    """Build skill rows that apply to ``variant``."""
+
+    rows = data.get("skills", [])
+    if not isinstance(rows, list):
+        raise ValueError("skills must be a list of tables")
+
+    parsed = []
+    for row in rows:
+        if not isinstance(row, Mapping):
+            raise ValueError("each skill must be a table")
+        variant_filter = row.get("variants", [])
+        if not isinstance(variant_filter, list) or not all(isinstance(item, str) for item in variant_filter):
+            raise ValueError("skills.variants must be a list of strings")
+        if variant_filter and variant not in variant_filter:
+            continue
+        parsed.append(SkillRow(label=string_field(row, "label"), value=string_field(row, "value")))
+    return parsed
+
+
+def parse_bullet(data: Mapping[str, Any]) -> Union[str, VariantText]:
+    """Build shared or variant-specific bullet text from a TOML bullet table."""
+
+    if not isinstance(data, Mapping):
+        raise ValueError("each bullet must be a table")
+
+    default = string_field(data, "text")
+    variants = optional_table(data, "variants")
+    if variants:
+        if not all(isinstance(name, str) and isinstance(value, str) for name, value in variants.items()):
+            raise ValueError("bullet variants must map variant names to strings")
+        return VariantText(default=default, variants=dict(variants))
+    return default
+
+
+def parse_experience(data: Mapping[str, Any]) -> list[Company]:
+    """Build unresolved company and role entries from resume source data."""
+
+    companies = data.get("experience", [])
+    if not isinstance(companies, list):
+        raise ValueError("experience must be a list of tables")
+
+    parsed_companies = []
+    for company in companies:
+        if not isinstance(company, Mapping):
+            raise ValueError("each experience entry must be a table")
+        roles = company.get("roles", [])
+        if not isinstance(roles, list):
+            raise ValueError("experience.roles must be a list of tables")
+
+        parsed_roles = []
+        for role in roles:
+            if not isinstance(role, Mapping):
+                raise ValueError("each role must be a table")
+            bullets = role.get("bullets", [])
+            if not isinstance(bullets, list):
+                raise ValueError("experience.roles.bullets must be a list of tables")
+            parsed_roles.append(
+                Role(
+                    title=string_field(role, "title"),
+                    dates=string_field(role, "dates"),
+                    bullets=[parse_bullet(bullet) for bullet in bullets],
+                )
+            )
+
+        parsed_companies.append(
+            Company(
+                name=string_field(company, "name"),
+                location=string_field(company, "location"),
+                roles=parsed_roles,
+            )
+        )
+    return parsed_companies
+
+
+def parse_education(data: Mapping[str, Any]) -> Education:
+    """Build education section data from resume source data."""
+
+    education = required_table(data, "education")
+    return Education(
+        school=string_field(education, "school"),
+        location=string_field(education, "location"),
+        details=string_field(education, "details"),
+    )
+
+
+def available_variants(path: Optional[Union[str, Path]] = None) -> tuple[str, ...]:
+    """Return variant names available in a resume TOML source."""
+
+    return tuple(parse_variants(load_resume_source(path)).keys())
+
+
+def skill_rows(variant: str, path: Optional[Union[str, Path]] = None) -> list[SkillRow]:
     """Return technical skill rows tailored to ``variant``."""
 
-    shared = [
-        SkillRow("Languages", "Ruby, SQL, JavaScript/TypeScript, Python, PHP, C#, Shell Scripting, VimScript"),
-        SkillRow("Frameworks", "Ruby on Rails 5-8, React, Hotwire/Turbo/Stimulus, Django, Laravel, .NET, Graphiti"),
-    ]
-    focused = [
-        SkillRow("Rails", "ActiveJob, ActionCable, Devise, Pundit, CanCanCan, Sidekiq, Resque, Rake tasks, Bullet, RubyGems")
-    ]
-    general = [
-        SkillRow("Backend", "Ruby/Rails, REST APIs, background jobs, Rake tasks, RubyGems, authorization, service/data modeling")
-    ]
-    return [
-        *shared,
-        *(focused if variant == "rails" else general),
-        SkillRow("Data/APIs", "PostgreSQL, MySQL, SQL Server, Redis, Elasticsearch, MongoDB, GraphQL/Hasura, DBML/data modeling"),
-        SkillRow("Cloud/DevOps", "AWS (S3, application hosting, logging), Docker, Vagrant, Git, GitHub, GitLab, Azure DevOps, CI/CD"),
-        SkillRow("Testing", "RSpec, Minitest, Test::Unit, Jest, Cypress, PHPUnit, Bats, CI linting, smoke testing"),
-        SkillRow("Security", "SOC 2 environments, PII/SSN data handling, role-based permissions, production data scrubbing"),
-        SkillRow("Leadership", "architecture, mentoring, product ownership, Scrum, stakeholder discovery, RCA writing, AI-assisted development"),
-    ]
+    return parse_skill_rows(load_resume_source(path), variant)
 
 
-# Work-history entries in reverse chronological order.
-EXPERIENCE = [
-    Company(
-        "Yolk Labs",
-        "Austin, TX",
-        [
-            Role(
-                "Senior Software Engineer, Remote Contract",
-                "Jun. 2026 - Present",
-                [
-                    "Modernized a mature oil and gas platform by upgrading end-of-life React, Node.js, and .NET versions back to supported LTS releases, reducing technical debt and improving maintainability.",
-                    "Took ownership of a stale web-app feature after more than a year of slow feedback cycles, led stakeholder/end-user discovery, and helped ship it within the first month.",
-                    "Deliver full-stack enhancements across React, C#/.NET, and SQL Server while consolidating legacy Oracle-backed workflows into a centralized application.",
-                    "Provide production support through a direct senior-user feedback channel, often turning urgent product feedback into same-hour fixes; introduce smoke testing to make legacy changes safer.",
-                ],
-            )
-        ],
-    ),
-    Company(
-        "Benefitbay",
-        "Kansas City, MO",
-        [
-            Role(
-                "Engineering Manager, Remote Full Time",
-                "Mar. 2025 - Oct. 2025",
-                [
-                    "Managed delivery for an enterprise Ruby on Rails application serving 80,000+ users, leading 3 US engineers, 1 QA engineer, 3 EU contract engineers, and 1 EU DevOps engineer.",
-                    "Owned feature-request translation with the Director of Engineering, introducing issue templates and scoped tickets that made PRs smaller, reviews more consistent, and releases more predictable.",
-                    "Operated as a hands-on engineering/product leader across production support, on-call escalation, RCA writeups, bug fixes, PR review, architecture discussions, and product design meetings.",
-                    "Led engineering standardization sessions around design patterns, AI-assisted development, and review practices to improve shared technical judgment across a distributed team.",
-                    "Implemented user acceptance testing and AI-assisted development standards, bringing decision-maker feedback and approved agent/tool practices into delivery without bypassing engineering review.",
-                ],
-            )
-        ],
-    ),
-    Company(
-        "Mortgage Connect Risk Solutions",
-        "Edmond, OK",
-        [
-            Role(
-                "Senior Software Engineer, Product-Focused, Remote Full Time",
-                "Apr. 2024 - Mar. 2025",
-                [
-                    "Served as technical/product lead for contractors replacing mission-critical C/Motif systems with modular Django, NuxtJS, and AWS applications spanning internal operations, reporting, and file workflows.",
-                    "Decomposed tightly coupled legacy workflows into modular replacement paths, preserving accuracy across business-critical internal operations such as reporting, accounting, payroll, and file processing.",
-                    "Migrated developers and internal stakeholders to Azure DevOps, Scrum, issue templates, PR guidelines, and code standards, reducing unreviewable change sets and improving first-release correctness.",
-                    "Owned backlog priority, user stories, code quality, and delivery alignment for a client-facing Ruby on Rails application with 100,000+ users.",
-                    "Partnered with executives and offshore contractors on architecture, roadmap alignment, RCA writeups, Scrum ceremonies, and post-launch technical ownership for PII-sensitive workflows.",
-                ],
-            )
-        ],
-    ),
-    Company(
-        "Public Strategies",
-        "Oklahoma City, OK",
-        [
-            Role(
-                "Product Software Engineer & Data Team Manager, Hybrid Full Time",
-                "Apr. 2023 - Mar. 2024",
-                [
-                    "Promoted to manage delivery across a 6-person data/product group, including 4 direct reports, MS Dynamics engineers, a Power BI specialist, and PM/BA partners.",
-                    "Took over an underused Microsoft Dynamics investment, introduced Scrum/discovery process, and enabled CRM adoption, custom application delivery, and migration of marketing workflows from Mailchimp.",
-                    "Oversaw Rails and Microsoft Dynamics work for permission-sensitive participant data, CMS/CRM, reporting, event management, and custom applications supporting 3 programs and several thousand users.",
-                ],
-            ),
-            Role(
-                "Senior Software Engineer, Hybrid Full Time",
-                "Aug. 2022 - Apr. 2023",
-                [
-                    VariantText(
-                        "Took over a stalled participant mobile-app backend after roughly 2 years of slow progress, finished the API/database work, and supported release within 6 months.",
-                        "Took over a stalled participant mobile-app backend after roughly 2 years of slow progress, finished the Rails API/database work, and supported release within 6 months.",
-                    ),
-                    "Delivered backend APIs and data models for participant engagement features including workshop schedules, attendance tracking, rewards, gas-card workflows, and program content.",
-                    VariantText(
-                        "Designed data architecture with DBML/dbdiagram.io, added CI/linting and test-readiness safeguards, and used Bullet to identify N+1 queries before refactoring data-heavy flows.",
-                        "Designed Rails data architecture with DBML/dbdiagram.io, added CI/linting and test-readiness safeguards, and used Bullet to identify N+1 queries before refactoring data-heavy flows.",
-                    ),
-                    VariantText(
-                        "Partnered with DevOps on application/AWS integration, including secrets, CI readiness, Rake tasks, data/schema dumps, imports, CSV seeding, and developer tooling.",
-                        "Partnered with DevOps on Rails/AWS integration, including secrets, CI readiness, Rake tasks, data/schema dumps, imports, CSV seeding, and developer tooling.",
-                    ),
-                ],
-            ),
-        ],
-    ),
-    Company(
-        "Weedmaps",
-        "Irvine, CA",
-        [
-            Role(
-                "Software Engineer III, Remote Full Time",
-                "Feb. 2022 - Aug. 2022",
-                [
-                    "Supported ad campaign creation and management for a high-volume marketplace with 1,000,000+ active users.",
-                    "Built a Graphiti REST adapter around a GraphQL/Hasura advertisement platform, allowing REST clients to consume ad-server CRUD operations through a safer, consistent API layer.",
-                    "Unblocked deadline-risk Best of Weedmaps 2022 work by clearing campaign technical debt and making yearly winner/trophy data reusable across web and native experiences.",
-                ],
-            )
-        ],
-    ),
-    Company(
-        "Public Strategies",
-        "Oklahoma City, OK",
-        [
-            Role(
-                "Software Engineer, Hybrid Full Time",
-                "Aug. 2019 - Feb. 2022",
-                [
-                    "Helped move a non-version-controlled PHP/SFTP production workflow into Laravel and then Ruby on Rails, eliminating direct production-file overwrites and improving maintainability.",
-                    "Built Rails APIs, Rails admin interfaces, and React + TypeScript front ends for reporting, data visualization, event calendars, webinar/podcast content, and client-managed organizational profiles.",
-                    "Built Planter as an internal Rails seeding/import framework for CSV-driven data setup, then extracted it into an open-source RubyGem.",
-                ],
-            )
-        ],
-    ),
-    Company(
-        "ADFITECH, Inc.",
-        "Edmond, OK",
-        [
-            Role(
-                "Desktop and Web Application Developer, Hybrid Full Time",
-                "Sep. 2015 - Aug. 2019",
-                [
-                    "Built Ruby/GTK workflow applications for roughly 300 internal users, routing loan data, images, audit findings, and department handoffs through Ruleby-based business rules and Redis-backed processing.",
-                    "Single-handedly rebuilt a rigid C-based loan selection process in Ruby, moving selection criteria into configuration and reducing the workflow from 3+ people to one part-time user.",
-                    "Built Redis-backed background jobs for reports and asynchronous workflows; maintained legacy C/PHP systems and data scrubbers for PII/SSN-safe lower environments.",
-                    "Trained junior developers in object-oriented Ruby, GitLab merge requests, command-line workflows, and common development practices; earlier roles included Jr. System Administrator, Technical Support, and Data/Image Import Specialist.",
-                ],
-            )
-        ],
-    ),
-]
+def build_resume_data(variant: str, path: Optional[Union[str, Path]] = None) -> Resume:
+    """Build a complete, render-ready resume for ``variant`` from TOML source data."""
 
-# Public project and open-source contribution bullets.
-OPEN_SOURCE = [
-    "Maintain 30+ documented, installable open-source projects at github.com/evanthegrayt, emphasizing developer productivity, automation, testing, and clear installation/usage documentation.",
-    "Built Planter, a Rails seeding/import RubyGem extracted from production work, and cdc, a zsh/bash directory-jump plugin with tab completion and session history.",
-    "Build and publish small developer tools, Vim plugins, shell utilities, and AI-agent workflow templates to reduce repetitive work and share practical patterns with other developers.",
-]
-
-# Short education section for all variants.
-EDUCATION = Education(
-    school="University of Central Oklahoma",
-    location="Edmond, OK",
-    details="Studied Psychology",
-)
-
-
-def build_resume_data(variant: str) -> Resume:
-    """Build a complete, render-ready resume for ``variant``."""
-
-    variant_config = VARIANTS[variant]
+    data = load_resume_source(path)
+    variants = parse_variants(data)
+    if variant not in variants:
+        names = ", ".join(variants)
+        raise ValueError(f"unknown resume variant {variant!r}; expected one of: {names}")
     return Resume(
-        contact=CONTACT,
-        variant=variant_config,
-        skills=skill_rows(variant),
-        experience=[company.resolve(variant) for company in EXPERIENCE],
-        open_source=OPEN_SOURCE,
-        education=EDUCATION,
+        contact=parse_contact(data),
+        variant=variants[variant],
+        skills=parse_skill_rows(data, variant),
+        experience=[company.resolve(variant) for company in parse_experience(data)],
+        open_source=parse_open_source(data),
+        education=parse_education(data),
     )
+
+
+# Default resume objects kept for callers that import the content module directly.
+CONTACT = parse_contact(_default_source())
+VARIANTS = parse_variants(_default_source())
+EXPERIENCE = parse_experience(_default_source())
+OPEN_SOURCE = parse_open_source(_default_source())
+EDUCATION = parse_education(_default_source())

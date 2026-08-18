@@ -5,7 +5,7 @@ that content into a concrete resume variant before handing it to an output
 adapter.
 """
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from typing import Union
 
@@ -70,20 +70,20 @@ class Variant:
 
 @dataclass(frozen=True)
 class VariantText:
-    """Text that changes between the general and Rails resume variants.
+    """Text that changes between resume variants.
 
     Attributes:
-        general: Copy to use for the default software-engineering resume.
-        rails: Copy to use when generating the Ruby/Rails-focused resume.
+        default: Copy to use when no variant-specific override exists.
+        variants: Copy keyed by variant name.
     """
 
-    general: str
-    rails: str
+    default: str
+    variants: Mapping[str, str]
 
     def resolve(self, variant: str) -> str:
-        """Return the text for ``variant``, falling back to general copy."""
+        """Return the text for ``variant``, falling back to default copy."""
 
-        return self.rails if variant == "rails" else self.general
+        return self.variants.get(variant, self.default)
 
 
 ResumeText = Union[str, VariantText]

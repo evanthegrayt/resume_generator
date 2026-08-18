@@ -2,6 +2,8 @@ PYTHON ?= python3
 VENV := .venv
 BIN := $(VENV)/bin
 INSTALL_STAMP := $(VENV)/.installed
+VENV_MARKER := $(VENV)/.project-root
+PROJECT_ROOT := $(abspath .)
 RESUME_GENERATOR := $(BIN)/resume-generator
 
 .DEFAULT_GOAL := help
@@ -20,33 +22,38 @@ help:
 	@printf "  make lint        Run ruff\n"
 	@printf "  make check       Run tests and linting\n"
 
-setup: $(INSTALL_STAMP)
+setup:
+	@if [ -d "$(VENV)" ] && [ "$$(cat "$(VENV_MARKER)" 2>/dev/null)" != "$(PROJECT_ROOT)" ]; then \
+		printf "Removing stale virtual environment for copied project path: $(VENV)\n"; \
+		rm -rf "$(VENV)"; \
+	fi
+	@if [ ! -f "$(INSTALL_STAMP)" ] || [ pyproject.toml -nt "$(INSTALL_STAMP)" ] || [ Makefile -nt "$(INSTALL_STAMP)" ]; then \
+		$(PYTHON) -m venv "$(VENV)"; \
+		"$(BIN)/python" -m pip install --upgrade pip; \
+		"$(BIN)/python" -m pip install -e ".[dev]"; \
+		printf "%s\n" "$(PROJECT_ROOT)" > "$(VENV_MARKER)"; \
+		touch "$(INSTALL_STAMP)"; \
+	fi
 
-$(INSTALL_STAMP): pyproject.toml
-	$(PYTHON) -m venv $(VENV)
-	$(BIN)/python -m pip install --upgrade pip
-	$(BIN)/python -m pip install -e ".[dev]"
-	touch $(INSTALL_STAMP)
-
-html: $(INSTALL_STAMP)
+html: setup
 	$(RESUME_GENERATOR) --format html
 
-docx: $(INSTALL_STAMP)
+docx: setup
 	$(RESUME_GENERATOR) --format docx
 
-docx-no-pdf: $(INSTALL_STAMP)
+docx-no-pdf: setup
 	$(RESUME_GENERATOR) --format docx --no-pdf
 
-build: $(INSTALL_STAMP)
+build: setup
 	$(RESUME_GENERATOR)
 
-docs:
-	$(PYTHON) scripts/build_api_docs.py
+docs: setup
+	$(BIN)/python scripts/build_api_docs.py
 
-test: $(INSTALL_STAMP)
+test: setup
 	$(BIN)/pytest
 
-lint: $(INSTALL_STAMP)
+lint: setup
 	$(BIN)/ruff check .
 
 check: test lint

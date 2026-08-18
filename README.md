@@ -28,8 +28,10 @@ src/resume_generator/
   adapters/
     docx.py          # DOCX/PDF rendering support
     html.py          # GitHub Pages HTML renderer
+  data/
+    default_resume.toml # packaged default resume content
   cli.py             # console command orchestration
-  content.py         # resume content and variants
+  content.py         # TOML loading and variant assembly
   models.py          # typed resume data objects
   private_contact.py # local-only contact override loading
 
@@ -124,6 +126,12 @@ Use a different private contact file:
 .venv/bin/resume-generator --format docx --contact-file path/to/contact.toml
 ```
 
+Use a different resume TOML file:
+
+```sh
+.venv/bin/resume-generator --format docx --input path/to/resume.toml
+```
+
 Document outputs are written to ignored local files:
 
 ```text
@@ -150,6 +158,78 @@ The underlying Python entry points work too:
 ```sh
 .venv/bin/resume-generator --format html
 .venv/bin/python -m resume_generator --format html
+```
+
+## Resume TOML Input
+
+The packaged default resume lives at:
+
+```text
+src/resume_generator/data/default_resume.toml
+```
+
+Pass `--input` to generate output from another TOML file instead of the packaged
+default:
+
+```sh
+.venv/bin/resume-generator --format html --input path/to/resume.toml --variant default
+```
+
+The TOML schema is intentionally plain:
+
+```toml
+[contact]
+name = "Ada Example"
+location = "London, UK"
+linkedin = "linkedin.com/in/ada-example"
+github = "github.com/ada-example"
+
+[variants.default]
+stem = "ada-example-resume"
+headline = "Principal Analytical Engine Programmer"
+summary = "Builds reliable computing notes."
+
+[[skills]]
+label = "Languages"
+value = "Python, Ruby"
+
+[open_source]
+bullets = ["Published reusable notes."]
+
+[education]
+school = "University of Examples"
+location = "London, UK"
+details = "Studied computation"
+
+[[experience]]
+name = "Analytical Engines"
+location = "London, UK"
+
+[[experience.roles]]
+title = "Programmer"
+dates = "1842 - 1843"
+
+[[experience.roles.bullets]]
+text = "Translated technical notes."
+```
+
+Skills can be limited to specific variants:
+
+```toml
+[[skills]]
+label = "Research"
+value = "Mathematics, documentation"
+variants = ["research"]
+```
+
+Bullets can also define per-variant wording:
+
+```toml
+[[experience.roles.bullets]]
+text = "Documented a general algorithm."
+
+[experience.roles.bullets.variants]
+research = "Documented the first published general algorithm."
 ```
 
 ## Development
@@ -190,6 +270,9 @@ This writes static HTML API documentation to:
 docs/api/index.html
 ```
 
+`docs/api/` is ignored so the API docs stay generatable without being bundled
+with the main branch.
+
 You can also inspect the same docs directly from the command line:
 
 ```sh
@@ -205,6 +288,7 @@ Ignored local files:
 
 - `resume.private.toml`
 - `docs/downloads/`
+- `docs/api/`
 - `.venv/`
 - Python cache/build metadata
 

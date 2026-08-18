@@ -1,4 +1,6 @@
-from resume_generator.content import build_resume_data
+from resume_fixtures import write_custom_resume
+
+from resume_generator.content import available_variants, build_resume_data
 
 
 def test_html_resume_uses_general_variant_content():
@@ -31,3 +33,20 @@ def test_variant_specific_role_text_is_resolved():
 
     assert "finished the API/database work" in general_public_strategies[0]
     assert "finished the Rails API/database work" in rails_public_strategies[0]
+
+
+def test_custom_resume_toml_can_define_its_own_variants(tmp_path):
+    resume_path = write_custom_resume(tmp_path)
+
+    default = build_resume_data("default", resume_path)
+    research = build_resume_data("research", resume_path)
+
+    assert available_variants(resume_path) == ("default", "research")
+    assert default.contact.name == "Ada Example"
+    assert default.contact.phone == ""
+    assert default.contact.email == ""
+    assert default.variant.stem == "ada-example-resume"
+    assert [skill.label for skill in default.skills] == ["Languages"]
+    assert [skill.label for skill in research.skills] == ["Languages", "Research"]
+    assert default.experience[0].roles[0].bullets[1] == "Documented a general algorithm."
+    assert research.experience[0].roles[0].bullets[1] == "Documented the first published general algorithm."
