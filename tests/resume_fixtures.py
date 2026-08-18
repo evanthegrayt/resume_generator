@@ -9,8 +9,6 @@ def write_custom_resume(tmp_path):
         """[contact]
 name = "Ada Example"
 location = "London, UK"
-phone = ""
-email = ""
 linkedin = "linkedin.com/in/ada-example"
 github = "github.com/ada-example"
 

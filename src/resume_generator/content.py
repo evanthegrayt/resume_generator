@@ -88,6 +88,15 @@ def string_field(data: Mapping[str, Any], key: str) -> str:
     return value
 
 
+def optional_string_field(data: Mapping[str, Any], key: str) -> str:
+    """Return an optional string value from a TOML table, defaulting to blank."""
+
+    value = data.get(key, "")
+    if not isinstance(value, str):
+        raise ValueError(f"{key} must be a string")
+    return value
+
+
 def string_list(data: Mapping[str, Any], key: str) -> list[str]:
     """Return a required list of strings from a TOML table."""
 
@@ -110,10 +119,10 @@ def parse_contact(data: Mapping[str, Any]) -> Contact:
     return Contact(
         name=string_field(contact, "name"),
         location=string_field(contact, "location"),
-        phone=string_field(contact, "phone"),
-        email=string_field(contact, "email"),
-        linkedin=string_field(contact, "linkedin"),
-        github=string_field(contact, "github"),
+        phone=optional_string_field(contact, "phone"),
+        email=optional_string_field(contact, "email"),
+        linkedin=optional_string_field(contact, "linkedin"),
+        github=optional_string_field(contact, "github"),
     )
 
 

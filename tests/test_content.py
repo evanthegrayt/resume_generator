@@ -43,6 +43,8 @@ def test_custom_resume_toml_can_define_its_own_variants(tmp_path):
 
     assert available_variants(resume_path) == ("default", "research")
     assert default.contact.name == "Ada Example"
+    assert default.contact.phone == ""
+    assert default.contact.email == ""
     assert default.variant.stem == "ada-example-resume"
     assert [skill.label for skill in default.skills] == ["Languages"]
     assert [skill.label for skill in research.skills] == ["Languages", "Research"]

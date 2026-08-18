@@ -181,8 +181,6 @@ The TOML schema is intentionally plain:
 [contact]
 name = "Ada Example"
 location = "London, UK"
-phone = ""
-email = ""
 linkedin = "linkedin.com/in/ada-example"
 github = "github.com/ada-example"
 
