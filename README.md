@@ -321,3 +321,12 @@ application-ready resumes with private contact details.
 
 Configure GitHub Pages to publish from the `docs/` directory on the default
 branch. The hosted resume is `docs/index.html`.
+
+## Support this project
+
+I love knowing when people find my work useful. Any kind of support is very much
+appreciated!
+
+- ⭐️ Like the project? Star [the repository](https://github.com/evanthegrayt/resume_generator)!
+- ❤️ Love the project? Follow me [on GitHub](https://github.com/evanthegrayt)!
+- 💸 *Really* love it? Consider [buying me a tea](https://paypal.me/evanrgray)!
